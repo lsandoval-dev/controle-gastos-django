@@ -34,9 +34,6 @@ Este projeto foi desenvolvido com foco em estudo prático de **Django**, estrutu
 
 ## 📁 Estrutura do projeto
 
-gastos/
-
-
 ---
 
 ## ▶️ Como rodar o projeto
