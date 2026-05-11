@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Gastos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+
+    <header class="topo">
+    <h1>Controle de Gastos</h1>
+
+        <nav class="menu">
+            <a href="#salario">Salário</a>
+            <a href="#resumo">Resumo</a>
+            <a href="#despesa">Nova Despesa</a>
+            <a href="#lista">Despesas</a>
+        </nav>
+    </header>
+
+    <section class="bloco">
+        <h2>Filtrar por Mês</h2>
+
+    <form method="GET">
+        <select name="mes">
+            <option value="">Todos os meses</option>
+
+            <option value="1" {% if mes_selecionado == "1" %}selected{% endif %}>Janeiro</option>
+            <option value="2" {% if mes_selecionado == "2" %}selected{% endif %}>Fevereiro</option>
+            <option value="3" {% if mes_selecionado == "3" %}selected{% endif %}>Março</option>
+            <option value="4" {% if mes_selecionado == "4" %}selected{% endif %}>Abril</option>
+            <option value="5" {% if mes_selecionado == "5" %}selected{% endif %}>Maio</option>
+            <option value="6" {% if mes_selecionado == "6" %}selected{% endif %}>Junho</option>
+            <option value="7" {% if mes_selecionado == "7" %}selected{% endif %}>Julho</option>
+            <option value="8" {% if mes_selecionado == "8" %}selected{% endif %}>Agosto</option>
+            <option value="9" {% if mes_selecionado == "9" %}selected{% endif %}>Setembro</option>
+            <option value="10" {% if mes_selecionado == "10" %}selected{% endif %}>Outubro</option>
+            <option value="11" {% if mes_selecionado == "11" %}selected{% endif %}>Novembro</option>
+            <option value="12" {% if mes_selecionado == "12" %}selected{% endif %}>Dezembro</option>
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+    </section>
+        <section class="bloco">
+            <h2 id="salario">Definir Salário</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ salario_form.as_p }}
+                <button type="submit" name="salvar_salario">Salvar Salário</button>
+            </form>
+        </section>
+
+        <section class="bloco">
+            <h2 id="resumo">Resumo Financeiro</h2>
+
+            <div class="resumo">
+                <p><strong>Salário:</strong> R$ {{ salario }}</p>
+                <p><strong>Total de Gastos:</strong> R$ {{ total_gastos }}</p>
+
+                <p class="
+                    {% if saldo > 0 %}
+                        positivo
+                    {% elif saldo == 0 %}
+                        neutro
+                    {% else %}
+                        negativo
+                    {% endif %}
+                ">
+                    <strong>Saldo Restante:</strong> R$ {{ saldo }}
+                </p>
+            </div>
+        </section>
+
+        <section class="bloco">
+            <h2>Gráfico de Gastos</h2>
+            <canvas id="graficoGastos"></canvas>
+        </section>
+
+        <section class="bloco">
+            <h2 id="despesa">Nova Despesa</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Salvar</button>
+            </form>
+        </section>
+
+        <section class="bloco">
+            <h2 id="lista">Lista de Despesas</h2>
+
+            <table>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Categoria</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+
+                {% for gasto in gastos %}
+                <tr>
+                    <td>{{ gasto.descricao }}</td>
+                    <td>R$ {{ gasto.valor }}</td>
+                    <td>{{ gasto.categoria }}</td>
+                    <td>{{ gasto.data|date:"d-m-Y" }}</td>
+                    <td>
+                        <a href="{% url 'editar_gasto' gasto.id %}">✏️ Editar</a> |
+                        <a href="{% url 'excluir_gasto' gasto.id %}"
+                        onclick="return confirm('Tem certeza que deseja excluir esta despesa?')">
+                        🗑️ Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">Nenhuma despesa cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </section>
+
+    </div>
+
+<script>
+const ctx = document.getElementById('graficoGastos').getContext('2d');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Gastos',
+            data: {{ valores|safe }},
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+</script>
+
+</body>
+</html>
